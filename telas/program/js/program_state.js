@@ -3,7 +3,8 @@
 
     const app = window.ProgramApp = window.ProgramApp || {};
 
-    const COLS = 9;
+    const MIN_COLS = 9;
+    const COLS = MIN_COLS;
     const SCAN_MS = 20;
 
     const state = {
@@ -60,11 +61,17 @@
         el._timer = setTimeout(() => el.classList.remove('show'), 2300);
     }
 
-    function syncCellWidth() {
-        const table = document.querySelector('.ladder-cells-table');
-        if (!table) return;
+    function getRungCols(rung) {
+        return Math.max(MIN_COLS, rung?.rows?.[0]?.length || MIN_COLS);
+    }
+
+    function syncCellWidth(tableEl = null) {
+        const table = tableEl || document.querySelector('.ladder-cells-table');
+        if (!table) return state.cellWidth;
+        const colCount = table.rows[0]?.cells.length || MIN_COLS;
         const tw = table.getBoundingClientRect().width;
-        if (tw > 0) state.cellWidth = tw / COLS;
+        if (tw > 0) state.cellWidth = tw / colCount;
+        return state.cellWidth;
     }
 
     function normalizeAddress(raw) {
@@ -116,7 +123,7 @@
     }
 
     function createEmptyRung(comment = '') {
-        const rows = [Array.from({ length: COLS }, () => createEmptyCell())];
+        const rows = [Array.from({ length: MIN_COLS }, () => createEmptyCell())];
         return {
             id: 'r_' + Math.random().toString(36).slice(2, 9),
             comment,
@@ -125,8 +132,59 @@
     }
 
     function ensureRowExists(rung, rowIdx) {
+        const cols = getRungCols(rung);
         while (rung.rows.length <= rowIdx) {
-            rung.rows.push(Array.from({ length: COLS }, () => createEmptyCell()));
+            rung.rows.push(Array.from({ length: cols }, () => createEmptyCell()));
+        }
+    }
+
+    // Insere uma coluna em toda a Rung preservando conexões horizontais e derivação em U
+    function insertColumnInRung(rung, insertCol, keepLeftLegAtInsert = false) {
+        const cols = getRungCols(rung);
+        const idx = Math.max(0, Math.min(cols, insertCol));
+
+        rung.rows.forEach((rowCells, rIdx) => {
+            const newCell = createEmptyCell();
+
+            if (rIdx === 0) {
+                const hasAnyContent = rowCells.some(c => c.type !== 'EMPTY');
+                if (hasAnyContent) newCell.type = 'WIRE';
+            } else {
+                const prevCell = idx > 0 ? rowCells[idx - 1] : null;
+                const nextCell = idx < rowCells.length ? rowCells[idx] : null;
+                const hasLeftLegHere = Boolean(rung.rows[rIdx - 1]?.[idx]?.branchDown);
+                if (prevCell && prevCell.type !== 'EMPTY' && nextCell && nextCell.type !== 'EMPTY' && !hasLeftLegHere) {
+                    newCell.type = 'WIRE';
+                }
+            }
+
+            rowCells.splice(idx, 0, newCell);
+
+            // Se inseriu exatamente sobre a perna esquerda de um U, mantém a perna esquerda na coluna inserida
+            if (keepLeftLegAtInsert && rowCells[idx + 1]?.branchDown) {
+                newCell.branchDown = true;
+                rowCells[idx + 1].branchDown = false;
+            }
+        });
+
+        // Se havia colunas sobrando apenas com FIO antes da coluna de saída, remove uma para manter o layout enxuto
+        trimTrailingWireColumns(rung);
+    }
+
+    function trimTrailingWireColumns(rung) {
+        let cols = getRungCols(rung);
+        while (cols > MIN_COLS) {
+            const checkCol = cols - 2; // coluna imediatamente antes da bobina/saída
+            const topCell = rung.rows[0]?.[checkCol];
+            const isRemovable =
+                topCell &&
+                ['EMPTY', 'WIRE'].includes(topCell.type) &&
+                !topCell.branchDown &&
+                rung.rows.slice(1).every(r => r[checkCol]?.type === 'EMPTY' && !r[checkCol]?.branchDown);
+
+            if (!isRemovable) break;
+            rung.rows.forEach(r => r.splice(checkCol, 1));
+            cols--;
         }
     }
 
@@ -294,12 +352,14 @@
     }
 
     Object.assign(app, {
+        MIN_COLS,
         COLS,
         SCAN_MS,
         state,
         cache,
         escapeHtml,
         showToast,
+        getRungCols,
         syncCellWidth,
         normalizeAddress,
         classifyAddress,
@@ -310,6 +370,8 @@
         createEmptyCell,
         createEmptyRung,
         ensureRowExists,
+        insertColumnInRung,
+        trimTrailingWireColumns,
         trimEmptyBottomRows,
         clearCell,
         scanUsedAddresses,
