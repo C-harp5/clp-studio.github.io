@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TwidoLadder Studio — Simulação de Circuito</title>
+    <link rel="stylesheet" href="simulate.css" />
+</head>
+
+<body>
+    <div class="sim-shell">
+        <!-- BARRA DE FERRAMENTAS SUPERIOR -->
+        <header class="sim-toolbar" role="toolbar" aria-label="Ferramentas do Simulador">
+            <div class="tool-group">
+                <button type="button" class="tool-btn active" data-sim-tool="SELECT"
+                    title="Selecionar / Mover / Interagir (Esc)">
+                    <span class="tool-sym">↖</span>
+                    <span class="tool-lbl">Mover / Operar</span>
+                </button>
+                <button type="button" class="tool-btn" data-sim-tool="WIRE" title="Desenhar Fio Elétrico (W)">
+                    <span class="tool-sym">⏧</span>
+                    <span class="tool-lbl">Fio (W)</span>
+                </button>
+                <button type="button" class="tool-btn" data-sim-tool="DELETE" title="Apagar Componente ou Fio (Del)">
+                    <span class="tool-sym">✕</span>
+                    <span class="tool-lbl">Apagar</span>
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button type="button" id="btnUndoSim" class="btn btn-sm" title="Desfazer última ação (Ctrl+Z)" disabled>
+                    ↶ Desfazer
+                </button>
+                <button type="button" id="btnRedoSim" class="btn btn-sm" title="Refazer ação (Ctrl+Y)" disabled>
+                    ↷ Refazer
+                </button>
+            </div>
+
+            <div class="tool-group">
+                <button type="button" id="btnRotateSelected" class="btn btn-sm"
+                    title="Rotacionar componente selecionado (R)">
+                    ↻ Girar (R)
+                </button>
+                <button type="button" id="btnClearWires" class="btn btn-sm" title="Remover todos os fios do circuito">
+                    ✂ Limpar Fios
+                </button>
+            </div>
+
+            <div class="probe-readout" id="probeReadout">
+                <span class="probe-badge">MULTÍMETRO</span>
+                <span id="probeText">Passe o mouse sobre um pino ou componente para medir tensão e corrente</span>
+            </div>
+        </header>
+
+        <!-- WORKSPACE: BIBLIOTECA DE COMPONENTES (ESQUERDA) + BANCADA SVG (DIREITA) -->
+        <main class="sim-workspace">
+            <aside class="comp-library" aria-label="Biblioteca de Componentes">
+                <div class="lib-header">
+                    <span>Componentes Elétricos</span>
+                    <span class="lib-hint">Arraste ou clique</span>
+                </div>
+
+                <div class="lib-body">
+                    <div class="lib-section-title">Passivos &amp; Sinalização</div>
+
+                    <div class="lib-item" draggable="true" data-comp-type="RESISTOR"
+                        title="Arraste para a bancada ou clique e insira">
+                        <div class="lib-icon">
+                            <svg viewBox="0 0 48 24" width="44" height="22">
+                                <line x1="2" y1="12" x2="10" y2="12" stroke="#94a3b8" stroke-width="2" />
+                                <polyline points="10,12 13,6 17,18 21,6 25,18 29,6 33,18 36,12" fill="none"
+                                    stroke="#38bdf8" stroke-width="2" stroke-linejoin="round" />
+                                <line x1="36" y1="12" x2="46" y2="12" stroke="#94a3b8" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="lib-meta">
+                            <strong>Resistor</strong>
+                            <span>1 kΩ (Duplo clique edita Ω)</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-item" draggable="true" data-comp-type="LED"
+                        title="Arraste para a bancada ou clique e insira">
+                        <div class="lib-icon">
+                            <svg viewBox="0 0 48 24" width="44" height="22">
+                                <line x1="2" y1="12" x2="16" y2="12" stroke="#94a3b8" stroke-width="2" />
+                                <polygon points="16,6 16,18 28,12" fill="rgba(244,63,94,0.35)" stroke="#f43f5e"
+                                    stroke-width="2" />
+                                <line x1="28" y1="6" x2="28" y2="18" stroke="#f43f5e" stroke-width="2" />
+                                <line x1="28" y1="12" x2="46" y2="12" stroke="#94a3b8" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="lib-meta">
+                            <strong>LED Indicador</strong>
+                            <span>Anodo (+) → Catodo (-)</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-section-title">Acionamentos (Entradas)</div>
+
+                    <div class="lib-item" draggable="true" data-comp-type="BUTTON"
+                        title="Segure pressionado para fechar contato">
+                        <div class="lib-icon">
+                            <svg viewBox="0 0 48 24" width="44" height="22">
+                                <line x1="2" y1="16" x2="15" y2="16" stroke="#94a3b8" stroke-width="2" />
+                                <circle cx="15" cy="16" r="2.2" fill="#38bdf8" />
+                                <line x1="15" y1="10" x2="33" y2="10" stroke="#38bdf8" stroke-width="2" />
+                                <line x1="24" y1="4" x2="24" y2="10" stroke="#38bdf8" stroke-width="2" />
+                                <circle cx="33" cy="16" r="2.2" fill="#38bdf8" />
+                                <line x1="33" y1="16" x2="46" y2="16" stroke="#94a3b8" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="lib-meta">
+                            <strong>Botão Pulsador (NA)</strong>
+                            <span>Pulso enquanto segurar</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-item" draggable="true" data-comp-type="SWITCH"
+                        title="Clique para alternar ligado/desligado">
+                        <div class="lib-icon">
+                            <svg viewBox="0 0 48 24" width="44" height="22">
+                                <line x1="2" y1="16" x2="15" y2="16" stroke="#94a3b8" stroke-width="2" />
+                                <circle cx="15" cy="16" r="2.2" fill="#10b981" />
+                                <line x1="15" y1="16" x2="31" y2="7" stroke="#10b981" stroke-width="2" />
+                                <circle cx="33" cy="16" r="2.2" fill="#10b981" />
+                                <line x1="33" y1="16" x2="46" y2="16" stroke="#94a3b8" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div class="lib-meta">
+                            <strong>Chave / Interruptor</strong>
+                            <span>Mantém estado (0 / 1)</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-section-title">Alimentação Auxiliar</div>
+
+                    <div class="lib-item" draggable="true" data-comp-type="VCC" title="Barramento +24V DC">
+                        <div class="lib-icon">
+                            <span class="pwr-badge pwr-24">+24V</span>
+                        </div>
+                        <div class="lib-meta">
+                            <strong>Fonte +24V DC</strong>
+                            <span>Terminal positivo</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-item" draggable="true" data-comp-type="GND" title="Referência 0V / GND">
+                        <div class="lib-icon">
+                            <span class="pwr-badge pwr-0">0V</span>
+                        </div>
+                        <div class="lib-meta">
+                            <strong>Terra / 0V (GND)</strong>
+                            <span>Referência negativa</span>
+                        </div>
+                    </div>
+
+                    <div class="lib-tips">
+                        <strong>Atalhos Rápidos:</strong><br />
+                        • Clique em qualquer <strong>pino</strong> para puxar um fio; arraste trechos do fio para
+                        alinhar.<br />
+                        • <strong>Espaço</strong> inverte a dobra do fio; <strong>Esc</strong> cancela.<br />
+                        • <strong>Duplo clique</strong> no Resistor ou LED para editar.<br />
+                        • <strong>R</strong> gira | <strong>Ctrl+Z</strong> desfaz | <strong>Ctrl+Y</strong> refaz.
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ÁREA DO CIRCUITO INTERATIVO -->
+            <section class="canvas-stage" id="canvasStage">
+                <svg id="circuitSvg" class="circuit-svg" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="simGridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <circle cx="1" cy="1" r="1" fill="rgba(148, 163, 184, 0.14)" />
+                        </pattern>
+                        <filter id="ledGlowFilter" x="-60%" y="-60%" width="220%" height="220%">
+                            <feGaussianBlur stdDeviation="4.5" result="blur" />
+                            <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Fundo Gradeado -->
+                    <rect id="gridBgRect" width="100%" height="100%" fill="url(#simGridPattern)" />
+
+                    <!-- Camada 1: Fios e Junções -->
+                    <g id="wiresLayer"></g>
+
+                    <!-- Camada 2: CLP (Protegido contra exclusão) -->
+                    <g id="plcLayer"></g>
+
+                    <!-- Camada 3: Componentes do Circuito -->
+                    <g id="componentsLayer"></g>
+
+                    <!-- Camada 4: Pré-visualização de Fio em Construção e Snap de Pino -->
+                    <g id="overlayLayer"></g>
+                </svg>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/simulate_state.js"></script>
+    <script src="js/simulate_engine.js"></script>
+    <script src="js/simulate_render.js"></script>
+    <script src="js/simulate_editor.js"></script>
+</body>
+
+</html>

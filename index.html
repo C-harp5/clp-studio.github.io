@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TwidoLadder Studio — Controlador Principal</title>
+    <style>
+        :root {
+            --bg-app: #0b1120;
+            --bg-panel: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #263349;
+            --bg-input: #090e1a;
+            --border-subtle: #334155;
+            --border-strong: #475569;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-emerald: #10b981;
+            --accent-sky: #38bdf8;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            overflow: hidden;
+        }
+
+        .main-shell {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .topbar {
+            background: rgba(15, 23, 42, 0.96);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 8px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 50;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #0ea5e9, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 13px;
+            color: #041019;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .offline-pill {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.14);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .nav-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 13px;
+            border-radius: 7px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.14s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(30, 41, 59, 0.7);
+        }
+
+        .nav-tab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--accent-sky);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.18);
+        }
+
+        .tab-step {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #7dd3fc;
+        }
+
+        .nav-tab.active .tab-step {
+            background: var(--accent-sky);
+            color: #041019;
+        }
+
+        .right-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-reset-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 4px 10px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulseLive 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseLive {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.45;
+                transform: scale(0.88);
+            }
+        }
+
+        .file-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 7px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.14s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-strong);
+        }
+
+        .btn-sky {
+            background: rgba(56, 189, 248, 0.16);
+            border-color: rgba(56, 189, 248, 0.45);
+            color: #7dd3fc;
+        }
+
+        .btn-sky:hover {
+            background: rgba(56, 189, 248, 0.25);
+        }
+
+        .btn-rose {
+            background: rgba(244, 63, 94, 0.16);
+            border-color: rgba(244, 63, 94, 0.45);
+            color: #fda4af;
+        }
+
+        .btn-rose:hover {
+            background: rgba(244, 63, 94, 0.28);
+        }
+
+        .screens-stage {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-app);
+        }
+
+        .screen-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: none;
+            background: var(--bg-app);
+        }
+
+        .screen-frame.active {
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e293b;
+            border: 1px solid var(--accent-emerald);
+            color: #f8fafc;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 200;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-shell">
+        <header class="topbar">
+            <div class="brand-group">
+                <div class="brand-badge">LAD</div>
+                <div>
+                    <div class="brand-title">
+                        TwidoLadder Studio
+                        <span class="offline-pill">100% OFFLINE</span>
+                    </div>
+                    <div class="brand-sub">Ambiente Integrado de Hardware, Ladder e Circuito</div>
+                </div>
+            </div>
+
+            <nav class="nav-tabs" aria-label="Navegação entre telas">
+                <button type="button" class="nav-tab" data-target-screen="describe">
+                    <span class="tab-step">1</span>
+                    <span>Hardware &amp; Módulos</span>
+                </button>
+                <button type="button" class="nav-tab active" data-target-screen="program">
+                    <span class="tab-step">2</span>
+                    <span>Programa Ladder</span>
+                </button>
+                <button type="button" class="nav-tab" data-target-screen="simulate">
+                    <span class="tab-step">3</span>
+                    <span>Simular Circuito</span>
+                </button>
+            </nav>
+
+            <div class="right-controls">
+                <div class="live-reset-bar">
+                    <div class="live-indicator" title="Ciclo de varredura do CLP ativo">
+                        <span class="pulse-dot"></span>
+                        <span>SCAN LIVE</span>
+                    </div>
+                    <button type="button" id="btnResetPlc" class="btn btn-rose"
+                        title="Zerar estados do CLP e da simulação">
+                        ↺ Resetar CLP
+                    </button>
+                </div>
+
+                <div class="file-actions">
+                    <button type="button" id="btnNewProject" class="btn" title="Iniciar projeto em branco">
+                        📄 Novo
+                    </button>
+                    <button type="button" id="btnOpenJson" class="btn" title="Abrir arquivo (.json)">
+                        📂 Abrir (.json)
+                    </button>
+                    <button type="button" id="btnSaveJson" class="btn btn-sky" title="Salvar projeto completo (.json)">
+                        💾 Salvar (.json)
+                    </button>
+                    <input type="file" id="fileInputJson" accept=".json" style="display:none" />
+                </div>
+            </div>
+        </header>
+
+        <main class="screens-stage">
+            <iframe id="frameDescribe" class="screen-frame" src="telas/describe/tela_describe.html"
+                title="Descrição de Hardware"></iframe>
+            <iframe id="frameProgram" class="screen-frame active" src="telas/program/tela_program.html"
+                title="Programa Ladder"></iframe>
+            <iframe id="frameSimulate" class="screen-frame" src="telas/simulate/tela_simulate.html"
+                title="Simulação de Circuito"></iframe>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const frames = {
+                describe: document.getElementById('frameDescribe'),
+                program: document.getElementById('frameProgram'),
+                simulate: document.getElementById('frameSimulate')
+            };
+
+            const centralState = {
+                activeScreen: 'program',
+                hardware: {
+                    mode: 'adaptive',
+                    cpu: {
+                        model: 'CLP Modular Adaptativo',
+                        power: '24V DC',
+                        di: 8,
+                        do: 6,
+                        ai: 0,
+                        ao: 0,
+                        maxModules: 7
+                    },
+                    modules: []
+                },
+                program: {
+                    rungs: [],
+                    tags: {},
+                    mapped: { inputs: [], outputs: [], vars: [], digitalInputs: [], digitalOutputs: [], analogInputs: [], analogOutputs: [] },
+                    bits: {},
+                    timers: {},
+                    counters: {}
+                },
+                circuit: {
+                    components: [],
+                    wires: []
+                }
+            };
+
+            function showToast(msg) {
+                const el = document.getElementById('toast');
+                el.textContent = msg;
+                el.classList.add('show');
+                clearTimeout(el._timer);
+                el._timer = setTimeout(() => el.classList.remove('show'), 2300);
+            }
+
+            function sendToFrame(frameEl, message) {
+                if (frameEl && frameEl.contentWindow) {
+                    frameEl.contentWindow.postMessage(message, '*');
+                }
+            }
+
+            function broadcast(message, excludeWindow = null) {
+                Object.values(frames).forEach(frameEl => {
+                    if (frameEl.contentWindow && frameEl.contentWindow !== excludeWindow) {
+                        frameEl.contentWindow.postMessage(message, '*');
+                    }
+                });
+            }
+
+            function switchScreen(screenKey) {
+                if (!frames[screenKey]) return;
+                centralState.activeScreen = screenKey;
+
+                document.querySelectorAll('.nav-tab').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.targetScreen === screenKey);
+                });
+
+                Object.entries(frames).forEach(([key, frameEl]) => {
+                    frameEl.classList.toggle('active', key === screenKey);
+                });
+
+                sendToFrame(frames[screenKey], {
+                    type: 'PROGRAM_STATE_SYNC',
+                    payload: centralState.program
+                });
+                sendToFrame(frames[screenKey], {
+                    type: 'HARDWARE_STATE_SYNC',
+                    payload: centralState.hardware
+                });
+            }
+
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchScreen(btn.dataset.targetScreen);
+                });
+            });
+
+            document.getElementById('btnResetPlc').addEventListener('click', () => {
+                broadcast({ type: 'CMD_RESET_PLC' });
+                showToast('CLP resetado em todas as telas.');
+            });
+
+            document.getElementById('btnNewProject').addEventListener('click', () => {
+                broadcast({ type: 'CMD_NEW_PROJECT' });
+                showToast('Novo projeto em branco iniciado.');
+            });
+
+            document.getElementById('btnSaveJson').addEventListener('click', () => {
+                const payload = {
+                    app: 'TwidoLadderStudio',
+                    version: 3,
+                    createdAt: new Date().toISOString(),
+                    hardware: centralState.hardware,
+                    rungs: centralState.program.rungs,
+                    tags: centralState.program.tags,
+                    circuit: centralState.circuit
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'projeto-clp.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Projeto salvo em projeto-clp.json');
+            });
+
+            const fileInput = document.getElementById('fileInputJson');
+            document.getElementById('btnOpenJson').addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (!Array.isArray(data.rungs)) throw new Error('Formato inválido');
+
+                        if (data.hardware) {
+                            centralState.hardware = { ...centralState.hardware, ...data.hardware };
+                            sendToFrame(frames.describe, { type: 'LOAD_HARDWARE_DATA', payload: centralState.hardware });
+                            sendToFrame(frames.program, { type: 'HARDWARE_STATE_SYNC', payload: centralState.hardware });
+                            sendToFrame(frames.simulate, { type: 'HARDWARE_STATE_SYNC', payload: centralState.hardware });
+                        }
+                        sendToFrame(frames.program, {
+                            type: 'LOAD_PROGRAM_DATA',
+                            payload: { rungs: data.rungs, tags: data.tags || {} }
+                        });
+                        if (data.circuit) {
+                            centralState.circuit = data.circuit;
+                            sendToFrame(frames.simulate, { type: 'LOAD_CIRCUIT_DATA', payload: data.circuit });
+                        }
+                        showToast('Projeto carregado com sucesso!');
+                    } catch (err) {
+                        showToast('Erro ao abrir o arquivo JSON.');
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            });
+
+            window.addEventListener('message', (e) => {
+                const msg = e.data;
+                if (!msg || typeof msg !== 'object') return;
+
+                if (msg.type === 'PROGRAM_STATE_SYNC') {
+                    centralState.program = { ...centralState.program, ...msg.payload };
+                    broadcast({ type: 'PROGRAM_STATE_SYNC', payload: centralState.program }, e.source);
+                } else if (msg.type === 'HARDWARE_STATE_SYNC') {
+                    centralState.hardware = { ...centralState.hardware, ...msg.payload };
+                    broadcast({ type: 'HARDWARE_STATE_SYNC', payload: centralState.hardware }, e.source);
+                } else if (msg.type === 'CIRCUIT_STATE_SYNC') {
+                    centralState.circuit = { ...centralState.circuit, ...msg.payload };
+                    broadcast({ type: 'CIRCUIT_STATE_SYNC', payload: centralState.circuit }, e.source);
+                } else if (msg.type === 'EXTERNAL_INPUT_STATE') {
+                    sendToFrame(frames.program, msg);
+                } else if (msg.type === 'REQUEST_INITIAL_SYNC') {
+                    sendToFrame(frames.program, { type: 'REQUEST_SYNC' });
+                    if (e.source) {
+                        e.source.postMessage({ type: 'PROGRAM_STATE_SYNC', payload: centralState.program }, '*');
+                        e.source.postMessage({ type: 'HARDWARE_STATE_SYNC', payload: centralState.hardware }, '*');
+                    }
+                } else if (msg.type === 'NAVIGATE_SCREEN') {
+                    switchScreen(msg.screen);
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

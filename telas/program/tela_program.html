@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TwidoLadder Studio — Programa Ladder</title>
+    <link rel="stylesheet" href="program.css" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- ÁREA PRINCIPAL: MÓDULOS I/O (ESQUERDA) + EDITOR LADDER (DIREITA) -->
+        <main class="workspace-grid">
+            <aside class="sidebar-modular" aria-label="Módulos de Variáveis e I/O">
+                <button type="button" class="sidebar-toggle" id="btnToggleSidebar" aria-expanded="true"
+                    aria-label="Recolher barra de módulos" title="Recolher/expandir módulos">
+                    <span class="sidebar-toggle-icon">☰</span><span class="sidebar-toggle-label">Módulos de I/O e
+                        variáveis</span>
+                </button>
+
+                <!-- MÓDULO 1: ENTRADAS (I / AI) -->
+                <div class="module-card" id="modInputs">
+                    <div class="module-header" data-toggle-module="modInputs">
+                        <div class="module-title-left">
+                            <span class="module-dot"
+                                style="background: var(--accent-sky); box-shadow: 0 0 8px rgba(56,189,248,0.6);"></span>
+                            <span>Entradas (I / AI)</span>
+                            <span class="module-count" id="countInputs">0</span>
+                        </div>
+                        <span class="module-chevron">▼</span>
+                    </div>
+                    <div class="module-body" id="bodyInputs">
+                        <div class="empty-module-hint">
+                            Nenhuma entrada no diagrama.<br />Insira um contato <strong>I0</strong>, <strong>I1</strong>
+                            ou <strong>AI0</strong> para mapear automaticamente.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÓDULO 2: SAÍDAS (Q / AQ) -->
+                <div class="module-card" id="modOutputs">
+                    <div class="module-header" data-toggle-module="modOutputs">
+                        <div class="module-title-left">
+                            <span class="module-dot"
+                                style="background: var(--accent-amber); box-shadow: 0 0 8px rgba(245,158,11,0.6);"></span>
+                            <span>Saídas (Q / AQ)</span>
+                            <span class="module-count" id="countOutputs">0</span>
+                        </div>
+                        <span class="module-chevron">▼</span>
+                    </div>
+                    <div class="module-body" id="bodyOutputs">
+                        <div class="empty-module-hint">
+                            Nenhuma saída no diagrama.<br />Insira uma bobina <strong>Q0</strong>, <strong>Q1</strong>
+                            ou <strong>AQ0</strong> para mapear automaticamente.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÓDULO 3: VARIÁVEIS, MEMÓRIAS & BLOCOS (M, T, C) -->
+                <div class="module-card" id="modVars">
+                    <div class="module-header" data-toggle-module="modVars">
+                        <div class="module-title-left">
+                            <span class="module-dot"
+                                style="background: var(--accent-purple); box-shadow: 0 0 8px rgba(168,85,247,0.6);"></span>
+                            <span>Variáveis &amp; Blocos (M / T / C)</span>
+                            <span class="module-count" id="countVars">0</span>
+                        </div>
+                        <span class="module-chevron">▼</span>
+                    </div>
+                    <div class="module-body" id="bodyVars">
+                        <div class="empty-module-hint">
+                            Nenhuma memória ou bloco no diagrama.<br />Use <strong>M0</strong>, <strong>T0</strong> ou
+                            <strong>C0</strong> nas linhas Ladder.
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section>
+                <div class="ladder-toolbar-card" role="toolbar" aria-label="Instruções Ladder">
+                    <div class="tool-group">
+                        <button type="button" class="tool-btn active" data-tool="SELECT"
+                            title="Selecionar / Editar célula (Esc)">
+                            <span class="tool-sym">↖</span>
+                            <span class="tool-lbl">Editar</span>
+                        </button>
+                    </div>
+
+                    <div class="tool-group">
+                        <button type="button" class="tool-btn" data-tool="NO" title="Contato Normalmente Aberto (F2)">
+                            <span class="tool-sym">| |</span>
+                            <span class="tool-lbl">NA (F2)</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="NC" title="Contato Normalmente Fechado (F3)">
+                            <span class="tool-sym">|/|</span>
+                            <span class="tool-lbl">NF (F3)</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="P"
+                            title="Detector de Borda de Subida / Pulso (F4)">
+                            <span class="tool-sym">|P|</span>
+                            <span class="tool-lbl">Pulso ↑</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="N" title="Detector de Borda de Descida (F5)">
+                            <span class="tool-sym">|N|</span>
+                            <span class="tool-lbl">Borda ↓</span>
+                        </button>
+                    </div>
+
+                    <div class="tool-group">
+                        <button type="button" class="tool-btn" data-tool="COIL" title="Bobina Direta (F6)">
+                            <span class="tool-sym">( )</span>
+                            <span class="tool-lbl">Bobina</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="COIL_NC" title="Bobina Negada (F7)">
+                            <span class="tool-sym">(/)</span>
+                            <span class="tool-lbl">Negada</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="SET" title="Bobina Set / Travar em 1 (F8)">
+                            <span class="tool-sym">(S)</span>
+                            <span class="tool-lbl">Set</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="RESET"
+                            title="Bobina Reset / Destravar para 0 (F9)">
+                            <span class="tool-sym">(R)</span>
+                            <span class="tool-lbl">Reset</span>
+                        </button>
+                    </div>
+
+                    <div class="tool-group">
+                        <button type="button" class="tool-btn" data-tool="TON"
+                            title="Temporizador On-Delay (T0, T1...)">
+                            <span class="tool-sym">[TON]</span>
+                            <span class="tool-lbl">Timer</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="CTU" title="Contador Crescente (C0, C1...)">
+                            <span class="tool-sym">[CTU]</span>
+                            <span class="tool-lbl">Contador</span>
+                        </button>
+                    </div>
+
+                    <div class="tool-group">
+                        <button type="button" class="tool-btn" data-tool="WIRE" title="Fio Horizontal de Ligação">
+                            <span class="tool-sym">───</span>
+                            <span class="tool-lbl">Fio</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="BRANCH"
+                            title="Adicionar Derivação Paralela em U (OR) abaixo da célula">
+                            <span class="tool-sym">└─┘</span>
+                            <span class="tool-lbl">Paralelo</span>
+                        </button>
+                        <button type="button" class="tool-btn" data-tool="DELETE"
+                            title="Apagar elemento ou ramo da célula (Del)">
+                            <span class="tool-sym">✕</span>
+                            <span class="tool-lbl">Limpar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AVISO DE LIMITAÇÃO DE HARDWARE (APARECE NO MODO CLP PRONTO SE EXCEDER PORTAS) -->
+                <div id="hwLimitBanner" class="hw-limit-banner" style="display: none;" role="alert">
+                    <div class="hw-limit-info">
+                        <div class="hw-limit-title">⚠ Limitação de Hardware do CLP Atingida</div>
+                        <div id="hwLimitDetails" class="hw-limit-desc"></div>
+                    </div>
+                    <button type="button" id="btnGoHardwareConfig" class="btn btn-rose btn-sm">
+                        ⚙ Ajustar CLP / Expansões
+                    </button>
+                </div>
+
+                <!-- Lista Dinâmica de Rungs -->
+                <div id="rungsContainer" class="rungs-container"></div>
+
+                <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+                    <button type="button" id="btnAddRung" class="btn btn-emerald">
+                        + Adicionar Nova Rung
+                    </button>
+                    <span style="font-size: 11px; color: var(--text-muted);">
+                        Dica: Arraste uma ferramenta até a célula desejada ou clique na célula. Dê duplo clique no
+                        elemento para digitar <strong>I1</strong>, <strong>Q1</strong>, <strong>AI0</strong>,
+                        <strong>AQ0</strong>, <strong>M1</strong>, <strong>T1</strong> ou <strong>C1</strong>.
+                    </span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE ENDEREÇO / TAG / PRESET -->
+    <div id="editModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span id="modalTitleText">Configurar Elemento</span>
+                <button type="button" id="btnCloseModal" class="btn btn-sm">✕</button>
+            </div>
+
+            <div class="form-field">
+                <label for="inputAddr">Endereço (ex: I1, Q1, AI0, AQ0, M1, T0, C0)</label>
+                <input type="text" id="inputAddr" class="form-input" autocomplete="off" placeholder="I0" />
+                <div id="quickChipsContainer" class="quick-chips"></div>
+            </div>
+
+            <div class="form-field">
+                <label for="inputTag">Nome / Apelido (Tag opcional)</label>
+                <input type="text" id="inputTag" class="form-input" style="font-family: var(--font-sans);"
+                    placeholder="Ex: Botão Liga, Motor Principal..." />
+            </div>
+
+            <div class="form-field" id="presetFieldGroup" style="display: none;">
+                <label for="inputPreset" id="presetFieldLabel">Preset (Tempo em ms ou Contagem)</label>
+                <input type="number" id="inputPreset" class="form-input" min="1" step="100" value="2000" />
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnDeleteFromModal" class="btn btn-rose btn-sm" style="margin-right: auto;">
+                    🗑 Remover
+                </button>
+                <button type="button" id="btnCancelModal" class="btn btn-sm">Cancelar</button>
+                <button type="button" id="btnSaveModal" class="btn btn-emerald btn-sm">Aplicar (Enter)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/program_state.js"></script>
+    <script src="js/program_engine.js"></script>
+    <script src="js/program_render.js"></script>
+    <script src="js/program_editor.js"></script>
+</body>
+
+</html>

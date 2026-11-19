@@ -1,0 +1,472 @@
+:root {
+    --bg-app: #0b1120;
+    --bg-panel: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #263349;
+    --bg-input: #090e1a;
+    --border-subtle: #334155;
+    --border-strong: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-emerald: #10b981;
+    --accent-sky: #38bdf8;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    overflow: hidden;
+    user-select: none;
+}
+
+.sim-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* =====================================================================
+   BARRA DE FERRAMENTAS SUPERIOR
+====================================================================== */
+.sim-toolbar {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    z-index: 20;
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-right: 10px;
+    border-right: 1px solid var(--border-subtle);
+}
+
+.tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s ease;
+}
+
+.tool-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-strong);
+}
+
+.tool-btn.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: var(--accent-sky);
+    color: #7dd3fc;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.tool-sym {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s ease;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--bg-card-hover);
+    border-color: var(--border-strong);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: 5px 9px;
+    font-size: 11px;
+}
+
+.probe-readout {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.probe-badge {
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(16, 185, 129, 0.16);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+/* =====================================================================
+   WORKSPACE: BIBLIOTECA + CANVAS SVG
+====================================================================== */
+.sim-workspace {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 245px minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.comp-library {
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.lib-header {
+    padding: 10px 12px;
+    background: rgba(30, 41, 59, 0.85);
+    border-bottom: 1px solid var(--border-subtle);
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lib-hint {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent-sky);
+}
+
+.lib-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.lib-section-title {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.lib-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border-radius: 9px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    cursor: grab;
+    transition: all 0.12s ease;
+}
+
+.lib-item:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-strong);
+}
+
+.lib-item.active-place {
+    border-color: var(--accent-sky);
+    background: rgba(56, 189, 248, 0.16);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.lib-icon {
+    width: 46px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pwr-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+.pwr-24 {
+    color: #fda4af;
+    background: rgba(244, 63, 94, 0.16);
+}
+
+.pwr-0 {
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.16);
+}
+
+.lib-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.lib-meta strong {
+    font-size: 11.5px;
+    color: var(--text-primary);
+}
+
+.lib-meta span {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.lib-tips {
+    margin-top: 8px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    background: rgba(9, 14, 26, 0.65);
+    border: 1px dashed var(--border-subtle);
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* =====================================================================
+   ÁREA DA BANCADA DE SIMULAÇÃO (SVG)
+====================================================================== */
+.canvas-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: var(--bg-app);
+}
+
+.circuit-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 1100px;
+    min-height: 760px;
+}
+
+.canvas-stage.mode-wire .circuit-svg,
+.canvas-stage.is-wiring .circuit-svg {
+    cursor: crosshair;
+}
+
+.canvas-stage.mode-place .circuit-svg {
+    cursor: copy;
+}
+
+/* Elementos SVG Interativos */
+.plc-group {
+    cursor: grab;
+}
+
+.plc-group:active {
+    cursor: grabbing;
+}
+
+.sim-comp-group {
+    cursor: grab;
+}
+
+.sim-comp-group:active {
+    cursor: grabbing;
+}
+
+.sim-comp-group.selected .comp-sel-box,
+.plc-group.selected .plc-sel-box {
+    opacity: 1;
+}
+
+.comp-sel-box,
+.plc-sel-box {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+}
+
+.pin-hit-area {
+    cursor: crosshair;
+}
+
+.pin-dot {
+    transition: r 0.1s ease, fill 0.1s ease;
+}
+
+.pin-hit-area:hover+.pin-dot,
+.pin-dot.hovered {
+    r: 6;
+    fill: #38bdf8;
+}
+
+/* Segmentos e Alças de Fios */
+.wire-hit-seg {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 14;
+    stroke-linecap: round;
+    cursor: pointer;
+}
+
+.wire-hit-seg.seg-h {
+    cursor: ns-resize;
+}
+
+.wire-hit-seg.seg-v {
+    cursor: ew-resize;
+}
+
+.canvas-stage.mode-delete .wire-hit-seg {
+    cursor: pointer;
+}
+
+.wire-visible-path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.wire-vertex-handle {
+    fill: #0f172a;
+    stroke: #38bdf8;
+    stroke-width: 2;
+    cursor: move;
+    transition: r 0.1s ease, fill 0.1s ease;
+}
+
+.wire-vertex-handle:hover {
+    fill: #38bdf8;
+}
+
+/* =====================================================================
+   EDITOR INLINE (MESMO PADRÃO DA TELA DE PROGRAMAÇÃO)
+====================================================================== */
+.inline-sim-editor {
+    position: absolute;
+    z-index: 120;
+    transform: translate(-50%, -100%);
+    background: #0b1220;
+    border: 1.5px solid var(--accent-sky);
+    border-radius: 7px;
+    padding: 5px 7px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 0 2px rgba(56, 189, 248, 0.25);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.inline-sim-input {
+    width: 86px;
+    height: 25px;
+    background: #050914;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: #f8fafc;
+    font: 700 12px var(--font-mono);
+    text-align: center;
+    outline: none;
+}
+
+.inline-sim-input:focus {
+    border-color: var(--accent-sky);
+}
+
+.led-color-picker {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.led-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.led-swatch.active {
+    border-color: #ffffff;
+    transform: scale(1.12);
+}
+
+.toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e293b;
+    border: 1px solid var(--accent-emerald);
+    color: #f8fafc;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 200;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

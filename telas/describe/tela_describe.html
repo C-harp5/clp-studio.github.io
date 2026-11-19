@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TwidoLadder Studio — Hardware &amp; Módulos</title>
+    <link rel="stylesheet" href="describe.css" />
+</head>
+
+<body>
+    <div class="describe-shell">
+        <!-- CABEÇALHO E SELETOR DE MODO DO CLP -->
+        <header class="hw-topbar">
+            <div>
+                <div class="hw-title">
+                    Configuração de Hardware &amp; Módulos do CLP
+                    <span id="modeHeaderBadge" class="mode-badge badge-adaptive">MODO LIVRE / ADAPTATIVO</span>
+                </div>
+                <div class="hw-subtitle">
+                    Escolha entre um CLP modular que se adapta automaticamente às variáveis do código ou um CLP pronto
+                    com limites físicos reais.
+                </div>
+            </div>
+
+            <div class="mode-switcher" role="group" aria-label="Modo de operação do CLP">
+                <button type="button" class="mode-btn active" data-hw-mode="adaptive">
+                    <span class="mode-dot dot-adaptive"></span>
+                    <span>CLP Modular (Adaptativo ao Código)</span>
+                </button>
+                <button type="button" class="mode-btn" data-hw-mode="fixed">
+                    <span class="mode-dot dot-fixed"></span>
+                    <span>CLP Pronto (Especificação Manual)</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- BANNER DE DIAGNÓSTICO DE LIMITAÇÕES -->
+        <div id="hwDiagnosticBanner" class="diag-banner diag-ok">
+            <div class="diag-content">
+                <strong id="diagTitle">✓ Modo Modular Adaptativo Ativo</strong>
+                <span id="diagDesc">O CLP e seus módulos de expansão digitais e analógicos se ajustam automaticamente ao
+                    código Ladder sem restrições de portas.</span>
+            </div>
+        </div>
+
+        <!-- FIGURA CENTRAL DO CLP NO TRILHO DIN -->
+        <section class="rack-showcase-card" aria-label="Representação visual do CLP e módulos">
+            <div class="rack-header">
+                <div class="rack-header-left">
+                    <span class="rack-tag">TRILHO DIN 35mm</span>
+                    <span id="rackSummaryTitle" class="rack-summary-text">Montagem Física do Controlador</span>
+                </div>
+                <div class="rack-legend">
+                    <span><i class="leg-dot led-on"></i> Ativo (1)</span>
+                    <span><i class="leg-dot led-mapped"></i> Mapeado no código</span>
+                    <span><i class="leg-dot led-spare"></i> Livre</span>
+                    <span><i class="leg-dot led-over"></i> Excedido</span>
+                </div>
+            </div>
+
+            <div class="din-rail-viewport">
+                <div class="din-rail-bar"></div>
+                <div id="plcRackContainer" class="plc-rack-row"></div>
+            </div>
+        </section>
+
+        <!-- PAINÉIS DE CONFIGURAÇÃO: CPU + EXPANSÕES + TABELA DE CAPACIDADE -->
+        <section class="config-grid">
+            <!-- 1. ESPECIFICAÇÕES DA CPU -->
+            <div class="cfg-card">
+                <div class="cfg-card-header">
+                    <span>1. Unidade Central (CPU CLP)</span>
+                    <span id="cpuModeTag" class="mini-pill">AUTO</span>
+                </div>
+                <div class="cfg-card-body">
+                    <div id="adaptiveCpuNotice" class="info-callout">
+                        No <strong>Modo Modular Adaptativo</strong>, a CPU e os módulos de expansão são dimensionados
+                        automaticamente. Se você usar entradas ou saídas analógicas (ex: <code>AI0</code>,
+                        <code>AQ0</code>, <code>%IW0.0</code>, <code>%QW0.0</code>), os módulos analógicos aparecerão
+                        automaticamente no trilho DIN acima.
+                    </div>
+
+                    <div id="fixedCpuForm" class="cpu-form-wrap" style="display: none;">
+                        <div class="field-row">
+                            <label for="cpuPresetSelect">Modelo Pré-definido (ou Personalizado)</label>
+                            <select id="cpuPresetSelect" class="ctrl-input">
+                                <option value="custom">Personalizado (Manual)</option>
+                                <option value="compact_14">CLP Compacto 14 I/O (8 DI / 6 DO)</option>
+                                <option value="mid_20_ai">CLP Intermediário 20 I/O + Analógica (12 DI / 8 DO / 2 AI)
+                                </option>
+                                <option value="adv_40_aio">CLP Avançado 40 I/O + Analógica (24 DI / 16 DO / 2 AI / 2 AO)
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="field-grid-2">
+                            <div>
+                                <label for="cpuModelInput">Nome / Modelo da CPU</label>
+                                <input type="text" id="cpuModelInput" class="ctrl-input" value="CLP Pronto 24V DC" />
+                            </div>
+                            <div>
+                                <label for="cpuPowerInput">Alimentação</label>
+                                <select id="cpuPowerInput" class="ctrl-input">
+                                    <option value="24V DC">24V DC</option>
+                                    <option value="110/220V AC">110/220V AC</option>
+                                    <option value="12V DC">12V DC</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="field-grid-4">
+                            <div>
+                                <label for="cpuDiInput">Entradas DI</label>
+                                <input type="number" id="cpuDiInput" class="ctrl-input mono" min="0" max="64"
+                                    value="8" />
+                            </div>
+                            <div>
+                                <label for="cpuDoInput">Saídas DO</label>
+                                <input type="number" id="cpuDoInput" class="ctrl-input mono" min="0" max="64"
+                                    value="6" />
+                            </div>
+                            <div>
+                                <label for="cpuAiInput">Entr. AI</label>
+                                <input type="number" id="cpuAiInput" class="ctrl-input mono" min="0" max="32"
+                                    value="0" />
+                            </div>
+                            <div>
+                                <label for="cpuAoInput">Saíd. AO</label>
+                                <input type="number" id="cpuAoInput" class="ctrl-input mono" min="0" max="32"
+                                    value="0" />
+                            </div>
+                        </div>
+
+                        <div class="field-row">
+                            <label for="cpuMaxModInput">Limite Máximo de Módulos de Expansão</label>
+                            <input type="number" id="cpuMaxModInput" class="ctrl-input mono" min="0" max="16"
+                                value="7" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. MÓDULOS DE EXPANSÃO -->
+            <div class="cfg-card">
+                <div class="cfg-card-header">
+                    <span>2. Módulos de Expansão</span>
+                    <button type="button" id="btnOpenAddModule" class="btn btn-sky btn-sm" style="display: none;">
+                        + Adicionar Módulo
+                    </button>
+                </div>
+                <div class="cfg-card-body">
+                    <div id="adaptiveModulesNotice" class="info-callout">
+                        Os módulos de expansão são gerados dinamicamente conforme o programa Ladder demanda mais portas
+                        digitais ou canais analógicos (<strong>AI</strong> / <strong>AQ</strong>).
+                    </div>
+
+                    <div id="fixedModulesArea" style="display: none;">
+                        <div id="modulesListContainer" class="modules-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BALANÇO DE PORTAS (PROGRAMA VS HARDWARE) -->
+            <div class="cfg-card">
+                <div class="cfg-card-header">
+                    <span>3. Balanço de Entradas e Saídas</span>
+                    <span id="balanceStatusPill" class="mini-pill">OK</span>
+                </div>
+                <div class="cfg-card-body">
+                    <div id="capacityTableContainer" class="capacity-list"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL PARA ADICIONAR MÓDULO DE EXPANSÃO -->
+    <div id="addModuleModal" class="modal-backdrop" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span>Adicionar Módulo de Expansão</span>
+                <button type="button" id="btnCloseModModal" class="btn btn-sm">✕</button>
+            </div>
+
+            <div class="field-row">
+                <label for="modPresetSelect">Tipo de Cartão de Expansão</label>
+                <select id="modPresetSelect" class="ctrl-input">
+                    <option value="di_8">Expansão Digital — 8 Entradas (8 DI)</option>
+                    <option value="do_8">Expansão Digital — 8 Saídas (8 DO)</option>
+                    <option value="dio_8">Expansão Digital Mista — 4 DI / 4 DO</option>
+                    <option value="ai_2">Expansão Analógica — 2 Entradas (2 AI)</option>
+                    <option value="ao_2">Expansão Analógica — 2 Saídas (2 AO)</option>
+                    <option value="aio_3">Expansão Analógica Mista — 2 AI / 1 AO</option>
+                    <option value="custom">Módulo Personalizado (Manual)</option>
+                </select>
+            </div>
+
+            <div class="field-row">
+                <label for="modNameInput">Nome / Referência do Módulo</label>
+                <input type="text" id="modNameInput" class="ctrl-input" value="Expansão 8 DI" />
+            </div>
+
+            <div class="field-grid-4">
+                <div>
+                    <label for="modDiInput">DI</label>
+                    <input type="number" id="modDiInput" class="ctrl-input mono" min="0" max="32" value="8" />
+                </div>
+                <div>
+                    <label for="modDoInput">DO</label>
+                    <input type="number" id="modDoInput" class="ctrl-input mono" min="0" max="32" value="0" />
+                </div>
+                <div>
+                    <label for="modAiInput">AI</label>
+                    <input type="number" id="modAiInput" class="ctrl-input mono" min="0" max="16" value="0" />
+                </div>
+                <div>
+                    <label for="modAoInput">AO</label>
+                    <input type="number" id="modAoInput" class="ctrl-input mono" min="0" max="16" value="0" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnCancelModModal" class="btn btn-sm">Cancelar</button>
+                <button type="button" id="btnConfirmAddModule" class="btn btn-emerald btn-sm">+ Inserir no
+                    Trilho</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/describe_state.js"></script>
+    <script src="js/describe_render.js"></script>
+    <script src="js/describe_editor.js"></script>
+</body>
+
+</html>
