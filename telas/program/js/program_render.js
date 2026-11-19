@@ -4,7 +4,7 @@
     const app = window.ProgramApp;
     const { state, cache, escapeHtml } = app;
 
-    function buildCellSvg(cell, rIdx, row, col) {
+    function buildCellSvg(cell, rIdx, row, col, cellW = null) {
         const key = `${rIdx}:${row}:${col}`;
         const en = state.energizedMap[key] || { left: false, right: false, down: false };
         const isHwInvalid = Boolean(cell.addr && state.hwValidation?.invalidAddrs?.has(cell.addr));
@@ -12,7 +12,7 @@
         const cRight = isHwInvalid ? '#f43f5e' : (en.right ? '#10b981' : '#475569');
         const cDown = en.down ? '#10b981' : '#475569';
         const tag = cell.addr && state.tags[cell.addr] ? state.tags[cell.addr] : '';
-        const w = state.cellWidth || 96;
+        const w = cellW || state.cellWidth || 96;
         const mid = w / 2;
 
         let svg = `<svg class="cell-svg" viewBox="0 0 ${w} 76">`;
@@ -21,7 +21,7 @@
             svg += `<line x1="0" y1="38" x2="0" y2="76" stroke="${cDown}" stroke-width="2.5" />`;
             svg += `<circle cx="0" cy="38" r="3" fill="${cDown}" />`;
         }
-        if (row > 0 && state.rungs[rIdx].rows[row - 1][col].branchDown) {
+        if (row > 0 && state.rungs[rIdx].rows[row - 1][col]?.branchDown) {
             const aboveEn = state.energizedMap[`${rIdx}:${row - 1}:${col}`]?.down;
             svg += `<line x1="0" y1="0" x2="0" y2="38" stroke="${aboveEn ? '#10b981' : '#475569'}" stroke-width="2.5" />`;
         }
@@ -108,6 +108,7 @@
         state.rungs.forEach((rung, rIdx) => {
             const card = document.createElement('div');
             card.className = 'rung-card';
+            const cols = app.getRungCols(rung);
 
             const rungNum = String(rIdx).padStart(3, '0');
             card.innerHTML = `
@@ -124,7 +125,7 @@
           </div>
         </div>
         <div class="rung-canvas-scroll">
-          <div class="ladder-grid-wrapper">
+          <div class="ladder-grid-wrapper" style="--cols:${cols}; min-width:${cols * 96 + 12}px;">
             <div class="power-rail left"></div>
             <table class="ladder-cells-table" data-rung-table="${rIdx}"></table>
             <div class="power-rail right ${state.rungRightRail[rIdx] ? 'energized' : ''}" data-right-rail="${rIdx}"></div>
@@ -133,9 +134,9 @@
       `;
 
             container.appendChild(card);
-            app.syncCellWidth();
-
             const table = card.querySelector('table');
+            const cw = app.syncCellWidth(table);
+
             rung.rows.forEach((rowCells, rowIdx) => {
                 const tr = document.createElement('tr');
                 rowCells.forEach((cell, colIdx) => {
@@ -145,7 +146,9 @@
                     td.dataset.row = rowIdx;
                     td.dataset.col = colIdx;
                     td.draggable = !['EMPTY', 'WIRE'].includes(cell.type);
-                    td.title = td.draggable ? 'Arraste para reposicionar • Duplo clique para editar a variável' : 'Clique para selecionar';
+                    td.title = td.draggable
+                        ? 'Arraste para reposicionar • Duplo clique para editar • Clique com contato ativo para inserir em série'
+                        : 'Clique para inserir';
 
                     if (
                         state.selectedCell &&
@@ -156,7 +159,7 @@
                         td.classList.add('selected');
                     }
 
-                    td.innerHTML = `<div class="cell-hover-ring"></div>${buildCellSvg(cell, rIdx, rowIdx, colIdx)}`;
+                    td.innerHTML = `<div class="cell-hover-ring"></div>${buildCellSvg(cell, rIdx, rowIdx, colIdx, cw)}`;
                     tr.appendChild(td);
                 });
                 table.appendChild(tr);
@@ -283,19 +286,21 @@
     }
 
     function updateLiveVisuals(mapped) {
-        app.syncCellWidth();
         updateHardwareWarningBanner();
 
-        document.querySelectorAll('.ladder-cell').forEach(td => {
-            const rIdx = Number(td.dataset.rung);
-            const row = Number(td.dataset.row);
-            const col = Number(td.dataset.col);
-            const cell = state.rungs[rIdx]?.rows[row]?.[col];
-            if (!cell) return;
-            const svgEl = td.querySelector('.cell-svg');
-            if (svgEl) {
-                svgEl.outerHTML = buildCellSvg(cell, rIdx, row, col);
-            }
+        document.querySelectorAll('[data-rung-table]').forEach(table => {
+            const rIdx = Number(table.dataset.rungTable);
+            const cw = app.syncCellWidth(table);
+            table.querySelectorAll('.ladder-cell').forEach(td => {
+                const row = Number(td.dataset.row);
+                const col = Number(td.dataset.col);
+                const cell = state.rungs[rIdx]?.rows[row]?.[col];
+                if (!cell) return;
+                const svgEl = td.querySelector('.cell-svg');
+                if (svgEl) {
+                    svgEl.outerHTML = buildCellSvg(cell, rIdx, row, col, cw);
+                }
+            });
         });
 
         document.querySelectorAll('[data-right-rail]').forEach(rail => {
