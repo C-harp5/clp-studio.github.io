@@ -2,7 +2,7 @@
     'use strict';
 
     const app = window.ProgramApp;
-    const { COLS, SCAN_MS, state, cache } = app;
+    const { SCAN_MS, state, cache } = app;
 
     function syncStateToMain(mapped, forceSend = false) {
         if (!window.parent || window.parent === window) return;
@@ -83,7 +83,8 @@
 
         state.rungs.forEach((rung, rIdx) => {
             const numRows = rung.rows.length;
-            const nodePower = Array.from({ length: numRows }, () => Array(COLS + 1).fill(false));
+            const cols = app.getRungCols(rung);
+            const nodePower = Array.from({ length: numRows }, () => Array(cols + 1).fill(false));
 
             for (let r = 0; r < numRows; r++) {
                 nodePower[r][0] = true;
@@ -91,12 +92,12 @@
 
             let rungHasOutputPower = false;
 
-            for (let c = 0; c < COLS; c++) {
+            for (let c = 0; c < cols; c++) {
                 let changed = true;
                 while (changed) {
                     changed = false;
                     for (let r = 0; r < numRows - 1; r++) {
-                        if (rung.rows[r][c].branchDown) {
+                        if (rung.rows[r][c]?.branchDown) {
                             if (nodePower[r][c] && !nodePower[r + 1][c]) {
                                 nodePower[r + 1][c] = true;
                                 changed = true;
@@ -193,16 +194,16 @@
             while (tailChanged) {
                 tailChanged = false;
                 for (let r = 0; r < numRows - 1; r++) {
-                    if (rung.rows[r][COLS - 1].branchDown) {
-                        if (nodePower[r][COLS] && !nodePower[r + 1][COLS]) {
-                            nodePower[r + 1][COLS] = true;
+                    if (rung.rows[r][cols - 1]?.branchDown) {
+                        if (nodePower[r][cols] && !nodePower[r + 1][cols]) {
+                            nodePower[r + 1][cols] = true;
                             tailChanged = true;
                         }
                     }
                 }
             }
 
-            nextRightRail[rIdx] = rungHasOutputPower || nodePower.some(row => row[COLS]);
+            nextRightRail[rIdx] = rungHasOutputPower || nodePower.some(row => row[cols]);
         });
 
         for (const [addr, mode] of Object.entries(state.forces)) {
