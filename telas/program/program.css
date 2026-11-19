@@ -1004,3 +1004,32 @@ body {
     color: #fda4af;
     border: 1px solid rgba(244, 63, 94, 0.45);
 }
+
+/* =====================================================================
+   INSERÇÃO EM SÉRIE & REDIMENSIONAMENTO DE RAMO EM U
+====================================================================== */
+#rungsContainer.leg-hover {
+    cursor: ew-resize;
+}
+
+.ladder-cell.insert-left::before,
+.ladder-cell.insert-right::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    width: 3.5px;
+    border-radius: 999px;
+    background: var(--accent-emerald);
+    box-shadow: 0 0 10px var(--accent-emerald);
+    pointer-events: none;
+    z-index: 25;
+}
+
+.ladder-cell.insert-left::before {
+    left: 1px;
+}
+
+.ladder-cell.insert-right::after {
+    right: 1px;
+}
